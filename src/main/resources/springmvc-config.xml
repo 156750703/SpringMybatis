@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		    			http://www.springframework.org/schema/mvc
+		    			http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+    <context:component-scan base-package="com.jun"></context:component-scan>
+    <!-- 设置默认配置文件 -->
+    <mvc:annotation-driven/>
+    <!-- 使用默认的servlet来响应静态文件 -->
+    <mvc:default-servlet-handler/>
+
+
+    <!-- 定义springmvc拦截器 -->
+    <!--
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*"/>
+            <bean class="com.jun.interceptor.AuthorizedInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    -->
+    <!--视图解析器 -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 前缀 -->
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <!-- 后缀 -->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 配置文件上传下载 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 文件上传大小上限  大小为字节(10M) -->
+        <property name="maxUploadSize">
+            <value>10485760</value>
+        </property>
+        <property name="defaultEncoding">
+            <value>UTF-8</value>
+        </property>
+    </bean>
+
+
+    <!-- 这个dao将通过下面自动扫描的方式，批量生成 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.jun.mapper"></property>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://47.104.128.16:3306/springmybatis"/>
+        <property name="username" value="root"/>
+        <property name="password" value="junhahahaha156"/>
+        <!-- 最大连接数量  150-->
+        <property name="maxTotal" value="5"/>
+        <!-- 最小空闲连接 -->
+        <property name="minIdle" value="1"/>
+        <!-- 最大空闲连接 -->
+        <property name="maxIdle" value="5"/>
+        <!-- 初始化连接数量 -->
+        <property name="initialSize" value="1"/>
+        <!-- 连接被泄露时是否打印 -->
+        <property name="logAbandoned" value="true"/>
+        <!-- 是否自动回收超时连接 -->
+        <property name="removeAbandonedOnBorrow" value="true"/>
+        <!-- 超时等待时间(以秒为单位) -->
+        <property name="removeAbandonedTimeout" value="10"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <!-- 上面有MapperScannerConfigurer扫描,所以这个就可以不要了 -->
+        <!--
+        <property name="mapperLocations" value="classpath:com/jun/dao/*.xml"></property>
+         -->
+    </bean>
+
+
+    <!-- 事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 使用声明式事务管理 -->
+    <!--
+    <tx:annotation-driven transaction-manager="txManager"/>
+     -->
+
+    <!--
+   <tx:advice id="txTransfer" transaction-manager="txManager">
+       <tx:attributes>
+           <tx:method name="transfer"/>
+       </tx:attributes>
+   </tx:advice>
+
+   <aop:config>
+       <aop:pointcut expression="execution(* com.jun.service.CardService.transfer(..))" id="pcTransfer"/>
+       <aop:advisor pointcut-ref="pcTransfer" advice-ref="txTransfer"/>
+   </aop:config>
+      -->
+</beans>
